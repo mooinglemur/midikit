@@ -5,7 +5,7 @@ MIDI playback engine for the Commander X16
 
 MIDIKit is a MIDI playback library for the Commander X16 meant for sending MIDI data via 16550A-style serial UARTs.  Features include:
 
-* Playback of MIDI Format 0 (single track) files from high RAM
+* Playback of MIDI Format 0 (type 0, or single track) files from high RAM
 * Optional looping once it reaches the end
 * Pausing and resuming playback
 * ZCM playback support for VERA PCM.
@@ -59,11 +59,14 @@ All calls except for `midikit_tick` are meant to be called from the main loop of
 ---
 #### `midikit_init_engine`
 ```
-Inputs: .A = IOBASE offset from $9F00 at which to find the MIDI UART, .X = number of serial bytes to send before deferring until the next tick.
+Inputs: .A = IOBASE offset from $9F00 at which to find the MIDI UART,
+        .X = number of serial bytes to send before deferring until the next tick.
 ```
 This routine *must* be called once before any other library routines are called in order to initialize the state of the engine.
 
-If .X is not 0, MIDIKit will cap the number of bytes sent over the serial port to this value on each tick, returning and deferring processing until the next tick if this value is reached or exceeded after a MIDI event. This prevents obnoxiously busy MIDI files from monopolizing the interrupt for more than a frame, which lags the game and the music. A value around 30 or less is recommended, which is about 3/5 of the raster time for the MIDI rate of 3125 bytes per second at 60 frames per second. You can lower this value if you need more CPU time for game logic, at the risk of the music sounding "mushy" or "jittery" in busy sections.
+If .X is not 0, MIDIKit will cap the number of bytes sent over the serial port to this value on each tick, returning and deferring processing until the next tick if this value is reached or exceeded after a MIDI event. This prevents obnoxiously busy MIDI files from monopolizing the interrupt for more than a frame, which lags the game and the music. A value around 30 or less is recommended, which is about 3/5 of the raster time for the MIDI rate of 3125 bytes per second at 60 frames per second. You can lower this value if you need more CPU time for game logic, at the risk of the music sounding either "mushy" or "jittery" in busy sections.
+
+In extreme cases with a lowered value of .X, an extremely busy song will repeatedly fall behind and catch up.
 
 If .X = 0, this logic is disabled.
 
@@ -74,9 +77,10 @@ Inputs: .A = RAM bank, .X .Y = memory location (lo hi)
 Outputs: carry set if error, clear otherwise
 ```
 
-This function sets up the song pointers and parses the header based on a MIDI file that was previously loaded into RAM. If the song is deemed valid, it marks it as playable.
+This function sets up the song pointers and parses the header based on a MIDI file that was previously loaded into RAM. If the song is deemed valid, it marks it as playable.  
 
-If carry is set, an invalid MIDI file was passed in. MIDIKit only supports MIDI Format 0 files (single track). To convert a MIDI Format 1 file to Format 0, you can use this (Python script)[convertmidi.py]
+If carry is set, an invalid MIDI file was passed in. **NOTE:** MIDIKit only supports MIDI Format 0 (type 0) files (single track). To convert a MIDI Format 1 file to Format 0, you can use this [Python script](convertmidi.py)
+
 ---
 
 #### `midikit_play`
