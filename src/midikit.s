@@ -722,6 +722,9 @@ chloop:
 .endproc
 
 .proc midikit_setmem: near
+	php
+	sei
+
 	; lay down the parameters immediately
 	sta midi_startbank
 	stx midi_startoffset
@@ -778,12 +781,14 @@ chloop:
 	stz midi_playable
 	stz midi_playing
 
+	plp
 	jmp midikit_rewind
 MThd:
 	.byte "MThd"
 MTrk:
 	.byte "MTrk"
 error:
+	plp
 	sec
 	rts
 .endproc
