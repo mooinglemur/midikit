@@ -42,7 +42,7 @@ $(SDCARD): $(EXE)
 	parted -s $(SDCARD) mklabel msdos mkpart primary fat32 2048s -- -1
 	mformat -i $(SDCARD)@@1M -v $(call UC,$(PROJECT)) -F
 	mcopy -i $(SDCARD)@@1M -o -m $(EXE) ::
-	mcopy -i $(SDCARD)@@1M -o -m *.ZSM ::
+	mcopy -i $(SDCARD)@@1M -o -m *.MID *.ZCM ::
 
 .PHONY: clean run
 clean:

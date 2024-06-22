@@ -1,8 +1,5 @@
 DEFINES =
 
-# Disabled to save space as most don't plan to stream ZSMs from disk
-# Saves about 1.5kB of low RAM
-
 UC = $(shell echo '$1' | tr '[:lower:]' '[:upper:]')
 
 PROJECT	:= midikit

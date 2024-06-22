@@ -52,7 +52,7 @@ SEGMENTS {
 
 ## API Quick Reference
 
-### API calls for main part of the program (ZSM)
+### API calls for main part of the program
 
 All calls except for `midikit_tick` are meant to be called from the main loop of the program. `midikit_tick` is the only routine that is safe to call from IRQ.
 
