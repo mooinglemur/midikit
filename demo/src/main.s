@@ -26,6 +26,7 @@ oldirq:
 
 .proc main
 	lda #$68
+	ldx #10
 	jsr midikit::midikit_init_engine
 
 	jsr setup_handler

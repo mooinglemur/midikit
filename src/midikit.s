@@ -128,7 +128,7 @@ IOsLSR = * - 2
 plasta:
 	plx
 	pla
-	sta $9fb9
+	inc sent_serial_bytes
 	sta IO_BASE
 IOsTHR = * - 2
 	rts
@@ -136,7 +136,6 @@ timeout:
 plxarts:
 	plx
 	pla
-	sta $9fba
 	rts
 
 .endproc
@@ -144,17 +143,21 @@ plxarts:
 ;......................
 ; midikit_init_engine :
 ;============================================================================
-; Arguments: .A = IO base offset
+; Arguments: .A = IO base offset  .X = max serial bytes per tick
 ; Returns: (none)
 ; Preserves: (none)
 ; Allowed in interrupt handler: no
 ; ---------------------------------------------------------------------------
 ;
 ; This routine sets up the serial MIDI port and the engine itself
+; if .X is nonzero, the tick will return after this many serial
+; bytes have been sent, catching up on the next tick
 
 .proc midikit_init_engine: near
 	php
 	sei
+
+	stx max_serial_bytes
 
 	tax
 	beq :+ ; don't initialize the zero device
@@ -336,6 +339,8 @@ loopable := do_event_meta::loopable
 	lda midi_playing
 	jeq end
 
+	stz sent_serial_bytes
+
 	sec
 	lda midi_track_delta_frac
 	sbc midi_deltas_per_call_frac
@@ -367,11 +372,18 @@ loopable := do_event_meta::loopable
 	sta midi_ptr+1
 
 eventloop:
+	lda #$00
+max_serial_bytes := * - 1
+	beq check_delta
+	cmp #$00
+sent_serial_bytes := * - 1
+	beq save_ptr
+	bcc save_ptr
+
+check_delta:
 	lda midi_track_delta+3
 	bpl save_ptr
 
-	lda #10
-	sta $9fbb
 	; we should be immediately after a delta
 	jsr fetch_indirect_byte
 
@@ -398,9 +410,10 @@ normal_status:
 event_error:
 	stz midi_playable
 	stz midi_playing
-;	jsr all_sound_off
+	jsr all_sound_off
 	bra end
 event_sysex:
+	sta previous_event
 	jsr serial_send_byte
 	jsr get_variable_length_chunk
 	jsr send_chunk
@@ -409,10 +422,21 @@ event_meta:
 	jsr do_event_meta
 	bra next_event
 normal_event:
+	cmp #$00
+previous_event = * - 1
+	beq s1
+	sta previous_event
 	jsr serial_send_byte
+s1:
 	jsr fetch_indirect_byte
+	bra cont_event
 short_event:
+	cmp previous_event
+	beq s2
+	sta previous_event
+cont_event:
 	jsr serial_send_byte
+s2:
 	jsr fetch_indirect_byte
 	jsr serial_send_byte
 next_event:
@@ -433,6 +457,9 @@ end:
 	sta X16::Reg::RAMBank
 	rts
 .endproc
+
+max_serial_bytes = midikit_tick::max_serial_bytes
+sent_serial_bytes = midikit_tick::sent_serial_bytes
 
 .proc midikit_play: near
 	lda midi_playable
@@ -571,7 +598,6 @@ chloop:
 
 .proc panic: near
 	jsr all_sound_off
-	rts
 	ldx #0
 chloop:
 	txa
@@ -639,8 +665,6 @@ chloop:
 	php
 	sei
 
-;	jsr panic ; reset MIDI playback state
-
 	lda midi_track_startbank
 	sta X16::Reg::RAMBank
 
@@ -673,6 +697,8 @@ chloop:
 .proc midikit_rewind: near
 	php
 	sei
+	jsr panic ; reset MIDI playback state
+
 	jsr _rewind
 
 	jsr get_variable_length
