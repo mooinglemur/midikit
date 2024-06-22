@@ -4,3 +4,7 @@ midikit_play         = $8C06
 midikit_stop         = $8C09
 midikit_rewind       = $8C0C
 midikit_setmem       = $8C0F
+midikit_setloop      = $8C12
+midikit_zcm_setmem   = $8C15
+midikit_zcm_play     = $8C18
+midikit_zcm_stop     = $8C1B

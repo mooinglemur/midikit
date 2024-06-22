@@ -50,20 +50,66 @@ oldirq:
 
 	jsr X16::Kernal::LOAD
 
+	lda #zcmfilename_end-zcmfilename
+	ldx #<zcmfilename
+	ldy #>zcmfilename
+
+	jsr X16::Kernal::SETNAM
+
+	lda #$20
+	sta X16::Reg::RAMBank
+
+	lda #2
+	ldx #8
+	ldy #2
+	jsr X16::Kernal::SETLFS
+
+	ldx #$00
+	ldy #$a0
+	lda #0
+
+	jsr X16::Kernal::LOAD
+
 	ldx #$00
 	ldy #$a0
 	lda #2
 	jsr midikit::midikit_setmem
+
+	lda #1
+	jsr midikit::midikit_setloop
 
 	jsr midikit::midikit_play
 
 	lda #0
 	sta X16::Reg::ROMBank
 
+prompt:
 	jsr X16::Kernal::PRIMM
-	.byte "NOW PLAYING. PRESS RETURN TO FINISH.",13,0
-	jsr X16::Kernal::BASIN
+	.byte "NOW PLAYING. PRESS RETURN TO PLAY PCM EFFECT.",13
+	.byte "OR X THEN RETURN TO EXIT.",13,0
+	stz exit_flag
+:	jsr X16::Kernal::BASIN
+	cmp #13
+	beq :+
+	cmp #'X'
+	bne :-
+	sta exit_flag
+	bra :-
+:	jsr X16::Kernal::BSOUT
+	lda exit_flag
+	bne exit
 
+	lda #$20
+	ldx #$00
+	ldy #$a0
+
+	jsr midikit::midikit_zcm_setmem
+
+	lda #$08
+	jsr midikit::midikit_zcm_play
+
+	bra prompt
+exit:
 	jsr midikit::midikit_stop
 
 	sei
@@ -80,8 +126,13 @@ oldirq:
 
 	rts
 filename:
-	.byte "WILLIAM0.MID"
+	.byte "DEMO.MID"
 filename_end:
+zcmfilename:
+	.byte "DEMO.ZCM"
+zcmfilename_end:
+exit_flag:
+	.byte 0
 .endproc
 
 .segment "CODE"

@@ -4,3 +4,7 @@
 .import midikit_stop
 .import midikit_play
 .import midikit_tick
+.import midikit_setloop
+.import midikit_zcm_setmem
+.import midikit_zcm_play
+.import midikit_zcm_stop
