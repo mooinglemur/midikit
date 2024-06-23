@@ -461,6 +461,7 @@ end:
 
 max_serial_bytes = midikit_tick::max_serial_bytes
 sent_serial_bytes = midikit_tick::sent_serial_bytes
+previous_event = midikit_tick::previous_event
 
 .proc midikit_play: near
 	lda midi_playable
@@ -885,6 +886,7 @@ loop:
 	cpx #mastervol_len
 	bne loop
 
+	stz previous_event
 	plp
 	rts
 mastervol:
