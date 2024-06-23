@@ -873,10 +873,10 @@ end:
 .proc midikit_master_vol: near
 	php
 	sei
-	cmp #$80
-	bcc :+
+	tax ; tax/bpl instead of cmp #$80/bcc, saves a byte
+	bpl :+
 	lda #$7F
-:	pha
+:	sta volbyte
 	ldx #0
 loop:
 	lda mastervol,x
@@ -885,15 +885,14 @@ loop:
 	cpx #mastervol_len
 	bne loop
 
-	pla
-	jsr serial_send_byte
-	lda #$F7
-	jsr serial_send_byte
-
 	plp
 	rts
 mastervol:
 	.byte $F0,$7F,$7F,$04,$01,$00
+volbyte:
+	.byte $7F
+coda:
+	.byte $F7
 mastervol_len = *-mastervol
 .endproc
 
