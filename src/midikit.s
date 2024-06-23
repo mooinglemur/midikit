@@ -13,6 +13,7 @@
 .export midikit_zcm_play
 .export midikit_zcm_setmem
 .export midikit_zcm_stop
+.export midikit_master_vol
 
 .import divide40_24
 .import multiply16x16
@@ -857,6 +858,45 @@ save_deltas:
 end:
     rts
 .endproc
+
+;.....................
+; midikit_master_vol :
+;============================================================================
+; Arguments: .A = volume (0-127)
+; Returns: (none)
+; Allowed in interrupt handler: yes
+; ---------------------------------------------------------------------------
+;
+; Sends a General MIDI SysEx message to the device to change the
+; master volume of all attached synthesizers
+;
+.proc midikit_master_vol: near
+	php
+	sei
+	cmp #$80
+	bcc :+
+	lda #$7F
+:	pha
+	ldx #0
+loop:
+	lda mastervol,x
+	jsr serial_send_byte
+	inx
+	cpx #mastervol_len
+	bne loop
+
+	pla
+	jsr serial_send_byte
+	lda #$F7
+	jsr serial_send_byte
+
+	plp
+	rts
+mastervol:
+	.byte $F0,$7F,$7F,$04,$01,$00
+mastervol_len = *-mastervol
+.endproc
+
 
 ;.....................
 ; midikit_zcm_setmem :

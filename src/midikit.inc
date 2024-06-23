@@ -8,3 +8,4 @@
 .import midikit_zcm_setmem
 .import midikit_zcm_play
 .import midikit_zcm_stop
+.import midikit_master_vol

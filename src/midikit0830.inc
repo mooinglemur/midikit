@@ -8,3 +8,4 @@ midikit_setloop      = $0842
 midikit_zcm_setmem   = $0845
 midikit_zcm_play     = $0848
 midikit_zcm_stop     = $084B
+midikit_master_vol   = $084E

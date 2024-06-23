@@ -139,6 +139,15 @@ Outputs: (none)
 
 Stops playback of a ZCM file, if any are in progress.
 
+---
+#### `midikit_master_vol`
+```
+Inputs: .A = volume (0-127)
+Outputs: (none)
+```
+
+Sets the master volume of the attached synthesizer(s) via a GM SysEx message.  For the Little Dreamer wavetable card, the power-on default is 127.
+
 
 ### Interrupt-safe routines
 

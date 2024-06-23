@@ -11,3 +11,4 @@ jmp midikit_setloop     ; $0822 / $0842 / $8C12
 jmp midikit_zcm_setmem  ; $0825 / $0845 / $8C15
 jmp midikit_zcm_play    ; $0828 / $0848 / $8C18
 jmp midikit_zcm_stop    ; $082B / $084B / $8C1B
+jmp midikit_master_vol  ; $082E / $084E / $8C1E
