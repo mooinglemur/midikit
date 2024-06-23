@@ -84,6 +84,23 @@ oldirq:
 	lda #0
 	sta X16::Reg::ROMBank
 
+	jsr X16::Kernal::PRIMM
+	.byte "FADING IN SLOWLY.",13,0
+	lda #0
+fadein:
+	pha
+	jsr midikit::midikit_master_vol
+	pla
+	ldx #0
+	ldy #0
+:	dex
+	bne :-
+	dey
+	bne :-
+	inc
+	cmp #$80
+	bcc fadein
+
 prompt:
 	jsr X16::Kernal::PRIMM
 	.byte "NOW PLAYING. PRESS RETURN TO PLAY PCM EFFECT.",13
@@ -111,6 +128,22 @@ prompt:
 
 	bra prompt
 exit:
+	jsr X16::Kernal::PRIMM
+	.byte "FADING OUT SLOWLY.",13,0
+	lda #127
+fadeout:
+	pha
+	jsr midikit::midikit_master_vol
+	pla
+	ldx #0
+	ldy #0
+:	dex
+	bne :-
+	dey
+	bne :-
+	dec
+	bne fadeout
+
 	jsr midikit::midikit_stop
 
 	sei

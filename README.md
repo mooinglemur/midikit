@@ -148,6 +148,7 @@ Outputs: (none)
 
 Sets the master volume of the attached synthesizer(s) via a GM SysEx message.  For the Little Dreamer wavetable card, the power-on default is 127.
 
+---
 
 ### Interrupt-safe routines
 
